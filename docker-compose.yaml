@@ -1,0 +1,11 @@
+services:
+  backend:
+    build:
+      context: backend
+    image: memocha-backend
+    container_name: memocha-backend
+    command: python
+    ports:
+      - 8055:8000
+    volumes:
+      - ./backend:/app
