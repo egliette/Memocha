@@ -8,9 +8,9 @@ Chatbot with Memory
 * [x] Repo setup, folders, Git
 * [x] FastAPI project initialization
 * [x] Health check endpoint
-* [ ] Environment configuration
-* [ ] Logging setup
-* [ ] PostgreSQL via Docker
+* [x] Environment configuration
+* [x] Logging setup
+* [x] PostgreSQL via Docker
 * [ ] SQLAlchemy models
 * [ ] Migrations
 * [ ] CRUD test
@@ -96,4 +96,4 @@ Chatbot with Memory
 * [ ] Add reasons why pick frameworks
 * [ ] Add Load Testing
 * [ ] Add Stress Testing
-* [ ] Learn about FastAPI's lifespan arg 
+* [ ] Learn about FastAPI's lifespan arg
