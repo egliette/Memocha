@@ -11,8 +11,8 @@ Chatbot with Memory
 * [x] Environment configuration
 * [x] Logging setup
 * [x] PostgreSQL via Docker
-* [ ] SQLAlchemy models
-* [ ] Migrations
+* [x] SQLAlchemy models
+* [x] Migrations
 * [ ] CRUD test
 * [ ] Basic `/chat` endpoint (no memory)
 
