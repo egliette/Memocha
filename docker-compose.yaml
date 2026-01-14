@@ -9,3 +9,7 @@ services:
       - 8055:8000
     volumes:
       - ./backend:/app
+
+networks:
+  memocha:
+    external: True

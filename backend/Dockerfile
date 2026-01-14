@@ -26,3 +26,5 @@ RUN uv sync --frozen
 ENV PATH="${UV_PROJECT_ENVIRONMENT}/bin:$PATH"
 
 COPY . .
+
+RUN ["uv", "run", "uvicorn", "app.main:app", "--reload"]

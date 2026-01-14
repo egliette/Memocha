@@ -6,8 +6,8 @@ Chatbot with Memory
 ### **Day 1 — Project & Backend Setup**
 
 * [x] Repo setup, folders, Git
-* [ ] FastAPI project initialization
-* [ ] Health check endpoint
+* [x] FastAPI project initialization
+* [x] Health check endpoint
 * [ ] Environment configuration
 * [ ] Logging setup
 * [ ] PostgreSQL via Docker
