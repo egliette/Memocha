@@ -14,7 +14,7 @@ Chatbot with Memory
 * [x] SQLAlchemy models
 * [x] Migrations
 * [ ] CRUD test
-* [ ] Basic `/chat` endpoint (no memory)
+* [x] Basic `/chat` endpoint (no memory)
 
 ---
 
