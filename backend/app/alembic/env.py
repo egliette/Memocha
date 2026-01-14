@@ -1,10 +1,10 @@
 from logging.config import fileConfig
 
 from alembic import context
-from core.config import settings
-from models.base import Base
-from models.messsage import Message
-from models.session import Session
+from app.core.config import settings
+from app.models.base import Base
+from app.models.message import Message
+from app.models.session import Session
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides

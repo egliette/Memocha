@@ -18,13 +18,15 @@ ENV PATH="/root/.local/bin/:$PATH"
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 ENV UV_COMPILE_BYTECODE=1
 
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock /app/
 
 RUN uv sync --frozen
 
 # Ensure uv uses dependencies from the created virtual environment
 ENV PATH="${UV_PROJECT_ENVIRONMENT}/bin:$PATH"
 
-COPY . .
+COPY ./app /app/app
+COPY ./tests /app/tests
 
-RUN ["uv", "run", "uvicorn", "app.main:app", "--reload"]
+# uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
