@@ -9,6 +9,9 @@ services:
       - 8055:8000
     volumes:
       - ./backend:/app
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      LOG_LEVEL: ${LOG_LEVEL}
 
 networks:
   memocha:
