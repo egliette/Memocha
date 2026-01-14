@@ -13,4 +13,6 @@ dependencies = [
     "alembic",
     "python-dotenv",
     "pydantic-settings",
+    "pytest",
+    "httpx",
 ]
