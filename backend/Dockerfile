@@ -7,13 +7,22 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ADD https://astral.sh/uv/0.4.17/install.sh /uv-installer.sh 
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
 
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 
-ENV PATH="/root/.cargo/bin/:$PATH"
+ENV PATH="/root/.local/bin/:$PATH"
 
-COPY requirements.txt .
-RUN uv pip install --system --no-cache-dir -r requirements.txt
+# Use a different virtual environment directory to avoid
+# creating it inside the mounted project directory
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+ENV UV_COMPILE_BYTECODE=1
+
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --frozen
+
+# Ensure uv uses dependencies from the created virtual environment
+ENV PATH="${UV_PROJECT_ENVIRONMENT}/bin:$PATH"
 
 COPY . .

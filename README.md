@@ -89,3 +89,11 @@ Chatbot with Memory
 * [ ] Environment variable setup
 * [ ] Deployment preparation
 
+## Pending List
+
+* [ ] Add Fallback - Retry strategy
+* [ ] Add CircutBreaker (PyBreaker)
+* [ ] Add reasons why pick frameworks
+* [ ] Add Load Testing
+* [ ] Add Stress Testing
+* [ ] Learn about FastAPI's lifespan arg 
