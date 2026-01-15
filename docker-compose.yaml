@@ -11,6 +11,10 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       LOG_LEVEL: ${LOG_LEVEL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LLM_MODEL: ${LLM_MODEL}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS}
     depends_on:
       db:
         condition: service_healthy

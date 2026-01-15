@@ -1,9 +1,13 @@
+from app.core.config import settings
 from app.core.database import get_db
+from app.core.logging import setup_logging
 from app.crud import message as message_crud
 from app.crud import session as session_crud
 from app.schemas.chat import ChatRequest, ChatResponse
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
+
+setup_logging(settings.log_level)
 
 app = FastAPI(title="Memocha")
 

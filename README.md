@@ -25,12 +25,12 @@
 
 **Goal:** Turn `/chat` into a real LLM-powered chatbot
 
-* [ ] Choose LLM provider (OpenAI / Azure / local / others)
-* [ ] Configure LLM API credentials
-* [ ] LLM client wrapper (service layer)
-* [ ] Define base system prompt
-* [ ] Implement single-turn LLM response
-* [ ] Handle model parameters (temperature, max tokens)
+* [x] Choose LLM provider (OpenAI / Azure / local / others)
+* [x] Configure LLM API credentials
+* [x] LLM client wrapper (service layer)
+* [x] Define base system prompt
+* [x] Implement single-turn LLM response
+* [x] Handle model parameters (temperature, max tokens)
 * [ ] Error handling & retry logic
 * [ ] Replace stub `/chat` with real LLM call
 
@@ -119,6 +119,56 @@
 
 ---
 
+
+## **Day 9 — Multi-User Concurrency & Scalability**
+
+**Goal:** Handle many concurrent users efficiently
+
+* [ ] Database connection pooling optimization
+  * [ ] Configure SQLAlchemy pool size (min/max connections)
+  * [ ] Set appropriate pool timeout and recycle settings
+  * [ ] Monitor connection pool usage
+* [ ] Async/await optimization
+  * [ ] Ensure all I/O operations are async (DB, LLM API calls)
+  * [ ] Use async database sessions (asyncpg)
+  * [ ] Verify LLM client supports async operations
+* [ ] Session isolation & security
+  * [ ] Verify session isolation (each user's data is separate)
+  * [ ] Add user authentication/authorization
+  * [ ] Implement user ID tracking per session
+* [ ] Rate limiting per user
+  * [ ] Implement rate limiting middleware (slowapi or similar)
+  * [ ] Set limits per user/IP (requests per minute)
+  * [ ] Return proper 429 responses with retry-after headers
+* [ ] LLM API rate limit handling
+  * [ ] Implement request queuing for LLM API calls
+  * [ ] Add exponential backoff for rate limit errors
+  * [ ] Consider request batching if supported
+* [ ] Caching strategies
+  * [ ] Cache frequently accessed session data
+  * [ ] Cache system prompts and templates
+  * [ ] Implement Redis for distributed caching (if multi-instance)
+* [ ] Connection pooling for external services
+  * [ ] Verify LLM client uses HTTP connection pooling
+  * [ ] Configure HTTP client timeouts appropriately
+  * [ ] Monitor external API connection health
+* [ ] Monitoring & observability
+  * [ ] Add request metrics (response time, error rate)
+  * [ ] Track concurrent user count
+  * [ ] Monitor database connection pool usage
+  * [ ] Set up alerts for high error rates or latency
+* [ ] Load testing
+  * [ ] Use locust or k6 for load testing
+  * [ ] Test with 100+ concurrent users
+  * [ ] Identify bottlenecks (DB, LLM API, memory)
+  * [ ] Measure p95/p99 response times
+* [ ] Horizontal scaling preparation
+  * [ ] Ensure stateless API design (no in-memory state)
+  * [ ] Use shared session storage (database, not memory)
+  * [ ] Configure load balancer sticky sessions (if needed)
+  * [ ] Test multi-instance deployment
+
+---
 
 ## Pending List
 
