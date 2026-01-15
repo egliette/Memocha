@@ -9,15 +9,18 @@ from app.core.exceptions import (
     LLMTimemoutError,
 )
 from app.core.prompts import BASE_SYSTEM_PROMPT
+from app.services.circuit_breaker import llm_circuit_breaker
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from openai import (
     APIConnectionError,
     APIError,
+    APITimeoutError,
     AuthenticationError,
     BadRequestError,
     RateLimitError,
 )
+from pybreaker import CircuitBreakerError
 from tenacity import (
     before_sleep_log,
     retry,
@@ -47,6 +50,7 @@ class LLMService:
             timeout=timeout,
         )
 
+    @llm_circuit_breaker
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=1, max=4),
@@ -58,8 +62,16 @@ class LLMService:
         try:
             response = self.llm.invoke(messages)
             return response.content
+        except CircuitBreakerError as e:
+            logger.error(f"Circuit breaker is open: {e}")
+            raise LLMServiceError(
+                "LLM service is temporily unavailable. Please try again later."
+            ) from e
         except RateLimitError as e:
             raise LLMRateLimitError(f"Rate limit exceeded: {str(e)}") from e
+        except APITimeoutError as e:
+            logger.error(f"Timeout error: {e}")
+            raise LLMTimemoutError(f"Request timed out: {str(e)}") from e
         except APIConnectionError as e:
             raise LLMConnectionError(f"Connection failed: {str(e)}") from e
         except AuthenticationError as e:

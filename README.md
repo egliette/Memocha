@@ -32,6 +32,7 @@
 * [x] Implement single-turn LLM response
 * [x] Handle model parameters (temperature, max tokens)
 * [x] Error handling & retry logic
+* [x] Add Circuit Breaker (PyBreaker)
 * [ ] Replace stub `/chat` with real LLM call
 
 ---
@@ -172,8 +173,8 @@
 
 ## Pending List
 
-* [ ] Add Fallback - Retry strategy
-* [ ] Add CircutBreaker (PyBreaker)
+* [x] Add Fallback - Retry strategy
+* [x] Add CircutBreaker (PyBreaker)
 * [ ] Add reasons why pick frameworks
 * [ ] Add Load Testing
 * [ ] Add Stress Testing
