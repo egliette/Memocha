@@ -1,9 +1,17 @@
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.exceptions import (
+    LLMConnectionError,
+    LLMRateLimitError,
+    LLMServiceError,
+    LLMTimeoutError,
+)
 from app.core.logging import setup_logging
+from app.core.prompts import BASE_SYSTEM_PROMPT
 from app.crud import message as message_crud
 from app.crud import session as session_crud
 from app.schemas.chat import ChatRequest, ChatResponse
+from app.services.llm_service import get_llm_service
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
@@ -30,7 +38,19 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         db=db, session_id=session.id, role="user", content=request.message
     )
 
-    response_text = f"You said {request.message}"
+    llm_service = get_llm_service()
+    try:
+        response_text = llm_service.chat(
+            user_message=request.message, system_prompt=BASE_SYSTEM_PROMPT
+        )
+    except LLMRateLimitError:
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    except LLMConnectionError:
+        raise HTTPException(status_code=503, detail="LLM service unavailable")
+    except LLMTimeoutError:
+        raise HTTPException(status_code=504, detail="LLM request timed out")
+    except LLMServiceError as e:
+        raise HTTPException(status_code=500, detail=f"LLM service error: {str(e)}")
 
     message_crud.create_message(
         db=db, session_id=session.id, role="assistant", content=response_text

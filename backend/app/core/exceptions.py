@@ -10,5 +10,5 @@ class LLMConnectionError(Exception):
     pass
 
 
-class LLMTimemoutError(Exception):
+class LLMTimeoutError(Exception):
     pass

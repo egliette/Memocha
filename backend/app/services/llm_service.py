@@ -6,7 +6,7 @@ from app.core.exceptions import (
     LLMConnectionError,
     LLMRateLimitError,
     LLMServiceError,
-    LLMTimemoutError,
+    LLMTimeoutError,
 )
 from app.core.prompts import BASE_SYSTEM_PROMPT
 from app.services.circuit_breaker import llm_circuit_breaker
@@ -71,7 +71,7 @@ class LLMService:
             raise LLMRateLimitError(f"Rate limit exceeded: {str(e)}") from e
         except APITimeoutError as e:
             logger.error(f"Timeout error: {e}")
-            raise LLMTimemoutError(f"Request timed out: {str(e)}") from e
+            raise LLMTimeoutError(f"Request timed out: {str(e)}") from e
         except APIConnectionError as e:
             raise LLMConnectionError(f"Connection failed: {str(e)}") from e
         except AuthenticationError as e:

@@ -33,7 +33,7 @@
 * [x] Handle model parameters (temperature, max tokens)
 * [x] Error handling & retry logic
 * [x] Add Circuit Breaker (PyBreaker)
-* [ ] Replace stub `/chat` with real LLM call
+* [x] Replace stub `/chat` with real LLM call
 
 ---
 
@@ -98,6 +98,7 @@
 **Goal:** Production-ready interaction
 
 * [ ] Enable streaming responses (backend)
+* [ ] Implement Server-Sent Events (SSE) for chat responses
 * [ ] Stream tokens to frontend
 * [ ] Typing indicator
 * [ ] Loading & error states
