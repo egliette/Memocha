@@ -2,9 +2,29 @@ import logging
 from typing import Optional
 
 from app.core.config import settings
+from app.core.exceptions import (
+    LLMConnectionError,
+    LLMRateLimitError,
+    LLMServiceError,
+    LLMTimemoutError,
+)
 from app.core.prompts import BASE_SYSTEM_PROMPT
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
+from openai import (
+    APIConnectionError,
+    APIError,
+    AuthenticationError,
+    BadRequestError,
+    RateLimitError,
+)
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +47,33 @@ class LLMService:
             timeout=timeout,
         )
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=4),
+        retry=retry_if_exception_type((APIConnectionError, RateLimitError)),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        reraise=True,
+    )
     def generate_response(self, messages: list) -> str:
-        response = self.llm.invoke(messages)
-        return response.content
+        try:
+            response = self.llm.invoke(messages)
+            return response.content
+        except RateLimitError as e:
+            raise LLMRateLimitError(f"Rate limit exceeded: {str(e)}") from e
+        except APIConnectionError as e:
+            raise LLMConnectionError(f"Connection failed: {str(e)}") from e
+        except AuthenticationError as e:
+            logger.error(f"Authentication error: {e}")
+            raise LLMServiceError(f"Authentication failed: {str(e)}") from e
+        except BadRequestError as e:
+            logger.error(f"Bad request: {e}")
+            raise LLMServiceError(f"Invalid request: {str(e)}") from e
+        except APIError as e:
+            logger.error(f"API error: {e}")
+            raise LLMServiceError(f"LLM API error: {str(e)}") from e
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}", exc_info=True)
+            raise LLMServiceError(f"Unexpected error: {str(e)}") from e
 
     def chat(self, user_message: str, system_prompt: Optional[str] = None) -> str:
         if system_prompt is None:

@@ -31,7 +31,7 @@
 * [x] Define base system prompt
 * [x] Implement single-turn LLM response
 * [x] Handle model parameters (temperature, max tokens)
-* [ ] Error handling & retry logic
+* [x] Error handling & retry logic
 * [ ] Replace stub `/chat` with real LLM call
 
 ---

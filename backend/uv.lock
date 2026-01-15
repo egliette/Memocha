@@ -729,6 +729,7 @@ dependencies = [
     { name = "pytest" },
     { name = "python-dotenv" },
     { name = "sqlalchemy" },
+    { name = "tenacity" },
     { name = "uvicorn" },
 ]
 
@@ -745,6 +746,7 @@ requires-dist = [
     { name = "pytest" },
     { name = "python-dotenv" },
     { name = "sqlalchemy" },
+    { name = "tenacity", specifier = ">=9.1.2" },
     { name = "uvicorn" },
 ]
 
