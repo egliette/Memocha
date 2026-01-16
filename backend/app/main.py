@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -25,6 +26,17 @@ from app.services.llm_service import get_llm_service
 setup_logging(settings.log_level)
 
 app = FastAPI(title="Memocha")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://frontend:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")

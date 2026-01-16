@@ -6,7 +6,7 @@
 
 ---
 
-## **Day 1 — Backend & Infrastructure (Completed)**
+## **Day 1 — Backend & Infrastructure*
 
 * [x] Repo setup, folders, Git
 * [x] FastAPI project initialization
@@ -53,7 +53,7 @@
 
 **Goal:** Usable chat interface
 
-* [ ] Initialize Next.js project
+* [x] Initialize Next.js project
 * [ ] Basic layout and routing
 * [ ] Chat UI (message list, input box, send button)
 * [ ] Role-based message styling
@@ -224,3 +224,5 @@
 * [ ] Add Load Testing
 * [ ] Add Stress Testing
 * [ ] Learn about FastAPI's lifespan arg
+* [ ] Allow other API, or self-hosted LLM models
+* [ ] Find an LLM Serving Engine
