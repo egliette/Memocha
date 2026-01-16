@@ -6,7 +6,7 @@
 
 ---
 
-## **Day 1 — Backend & Infrastructure*
+## **Day 1 — Backend & Infrastructure**
 
 * [x] Repo setup, folders, Git
 * [x] FastAPI project initialization
