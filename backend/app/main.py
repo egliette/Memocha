@@ -32,7 +32,7 @@ def health_check():
     return {"status": "ok"}
 
 
-@app.post("/sessions", reponse_model=SessionResponse, status_code=201)
+@app.post("/sessions", response_model=SessionResponse, status_code=201)
 async def create_session(db: Session = Depends(get_db)):
     session = session_crud.create_session(db)
     return SessionResponse.model_validate(session)
@@ -95,10 +95,23 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         db=db, session_id=session.id, role="user", content=request.message
     )
 
+    history_messages = message_crud.get_messages_by_session(
+        db=db,
+        session_id=session.id,
+        skip=0,
+        limit=50,
+    )
+
+    message_history = [
+        {"role": msg.role, "content": msg.content} for msg in history_messages[:-1]
+    ]
+
     llm_service = get_llm_service()
     try:
-        response_text = llm_service.chat(
-            user_message=request.message, system_prompt=BASE_SYSTEM_PROMPT
+        response_text = llm_service.chat_with_history(
+            user_message=request.message,
+            message_history=message_history,
+            system_prompt=BASE_SYSTEM_PROMPT,
         )
     except LLMRateLimitError:
         raise HTTPException(status_code=429, detail="Rate limit exceeded")

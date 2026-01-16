@@ -42,9 +42,9 @@
 **Goal:** Persist conversations as retrievable documents
 
 * [x] Session creation API
-* [ ] Fetch sessions API
-* [ ] Store user & assistant messages in DB
-* [ ] Message history API
+* [x] Fetch sessions API
+* [x] Store user & assistant messages in DB
+* [x] Message history API
 * [ ] Load full history per session
 * [ ] Define “daily memory” or chunking strategy
 * [ ] Normalize messages for embedding storage

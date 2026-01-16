@@ -1,4 +1,4 @@
-.PHONY: up down restart bash reattach build
+.PHONY: up down bash reattach build
 
 up:
 	docker-compose up -d

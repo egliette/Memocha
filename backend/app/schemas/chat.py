@@ -1,12 +1,15 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ChatRequest(BaseModel):
     message: str
-    session_id: Optional[UUID] = None
+    session_id: Optional[UUID] = Field(
+        default=None,
+        examples=[None],
+    )
 
 
 class ChatResponse(BaseModel):

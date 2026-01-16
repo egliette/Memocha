@@ -1,16 +1,7 @@
 import logging
 from typing import Optional
 
-from app.core.config import settings
-from app.core.exceptions import (
-    LLMConnectionError,
-    LLMRateLimitError,
-    LLMServiceError,
-    LLMTimeoutError,
-)
-from app.core.prompts import BASE_SYSTEM_PROMPT
-from app.services.circuit_breaker import llm_circuit_breaker
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from openai import (
     APIConnectionError,
@@ -28,6 +19,16 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
+
+from app.core.config import settings
+from app.core.exceptions import (
+    LLMConnectionError,
+    LLMRateLimitError,
+    LLMServiceError,
+    LLMTimeoutError,
+)
+from app.core.prompts import BASE_SYSTEM_PROMPT
+from app.services.circuit_breaker import llm_circuit_breaker
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +96,34 @@ class LLMService:
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_message),
         ]
+
+        response = self.generate_response(messages)
+
+        if not response or not response.strip():
+            logger.warning("Received empty response from LLM")
+            return "I apologize, but I couldn't generate a response. Please try again."
+
+        return response
+
+    def chat_with_history(
+        self,
+        user_message: str,
+        message_history: Optional[list[dict]] = None,
+        system_prompt: Optional[str] = None,
+    ) -> str:
+        if system_prompt is None:
+            system_prompt = BASE_SYSTEM_PROMPT
+
+        messages = [SystemMessage(content=system_prompt)]
+
+        if message_history:
+            for msg in message_history:
+                if msg["role"] == "user":
+                    messages.append(HumanMessage(content=msg["content"]))
+                elif msg["role"] == "assistant":
+                    messages.append(AIMessage(content=msg["content"]))
+
+        messages.append(HumanMessage(content=user_message))
 
         response = self.generate_response(messages)
 
