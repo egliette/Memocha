@@ -1,3 +1,6 @@
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import (
@@ -11,9 +14,9 @@ from app.core.prompts import BASE_SYSTEM_PROMPT
 from app.crud import message as message_crud
 from app.crud import session as session_crud
 from app.schemas.chat import ChatRequest, ChatResponse
+from app.schemas.message import MessageHistoryResponse, MessageResponse
+from app.schemas.session import SessionCreate, SessionResponse
 from app.services.llm_service import get_llm_service
-from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy.orm import Session
 
 setup_logging(settings.log_level)
 
@@ -23,6 +26,12 @@ app = FastAPI(title="Memocha")
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.post("/sessions", reponse_model=SessionResponse, status_code=201)
+async def create_session(db: Session = Depends(get_db)):
+    session = session_crud.create_session(db)
+    return SessionResponse.model_validate(session)
 
 
 @app.post("/chat", response_model=ChatResponse)

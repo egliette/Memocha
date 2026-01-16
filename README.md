@@ -41,7 +41,7 @@
 
 **Goal:** Persist conversations as retrievable documents
 
-* [ ] Session creation API
+* [x] Session creation API
 * [ ] Fetch sessions API
 * [ ] Store user & assistant messages in DB
 * [ ] Message history API
@@ -76,6 +76,11 @@
 * [ ] Generate embeddings for chat messages
 * [ ] Store embeddings with metadata (user, session, date)
 * [ ] Test vector insert & similarity search
+* [ ] Vector Search Performance Evaluation
+  * [ ] Measure retrieval latency
+  * [ ] Benchmark embedding generation speed
+  * [ ] Test vector search query time with different index types
+  * [ ] **Technologies/Methods:** Custom timing scripts, pytest-benchmark, vector similarity benchmarks
 
 ---
 
@@ -90,6 +95,24 @@
 * [ ] Inject retrieved memories into LLM context
 * [ ] Inject recent conversation window
 * [ ] Token & context length control
+* [ ] RAG Retrieval Evaluation
+  * [ ] Measure retrieval accuracy (precision, recall)
+  * [ ] Evaluate Mean Reciprocal Rank (MRR)
+  * [ ] Calculate Normalized Discounted Cumulative Gain (NDCG)
+  * [ ] Test retrieval relevance with ground truth
+  * [ ] **Technologies/Methods:** Custom evaluation scripts, scikit-learn metrics, vector similarity benchmarks, retrieval hit rate
+* [ ] End-to-End RAG System Evaluation
+  * [ ] Evaluate answer faithfulness (grounded in retrieved context)
+  * [ ] Measure answer relevance to user query
+  * [ ] Test context precision and recall
+  * [ ] Evaluate answer semantic similarity
+  * [ ] **Technologies/Methods:** RAGAS framework, custom evaluation pipeline, semantic similarity metrics
+* [ ] Memory Retrieval Quality
+  * [ ] Test memory recall accuracy across sessions
+  * [ ] Evaluate temporal relevance (recent vs old memories)
+  * [ ] Measure memory injection effectiveness
+  * [ ] Test memory chunking and retrieval strategies
+  * [ ] **Technologies/Methods:** Custom evaluation suite, A/B testing different retrieval strategies, relevance scoring
 
 ---
 
@@ -105,6 +128,12 @@
 * [ ] Session reset / clear memory
 * [ ] Long conversation stress testing
 * [ ] Memory relevance evaluation
+* [ ] Stress Testing & Edge Cases
+  * [ ] Test with very long conversations (1000+ messages)
+  * [ ] Evaluate performance with large memory stores
+  * [ ] Test retrieval with sparse/no relevant memories
+  * [ ] Measure degradation with context window limits
+  * [ ] **Technologies/Methods:** Locust, k6, custom stress test scripts, memory profiling
 
 ---
 
@@ -118,6 +147,17 @@
 * [ ] Dockerize backend cleanly
 * [ ] Environment variable hardening
 * [ ] Deployment preparation (prod vs dev configs)
+* [ ] Performance Benchmarking
+  * [ ] Measure LLM API latency (p50, p95, p99)
+  * [ ] Track end-to-end response time
+  * [ ] Monitor token usage and cost per request
+  * [ ] **Technologies/Methods:** pytest-benchmark, custom timing scripts, APM tools (Datadog, New Relic)
+* [ ] Cost Analysis
+  * [ ] Track LLM API costs per conversation
+  * [ ] Measure embedding generation costs
+  * [ ] Calculate storage costs (vector DB)
+  * [ ] Optimize cost vs quality trade-offs
+  * [ ] **Technologies/Methods:** Cost tracking scripts, usage analytics, cost optimization strategies
 
 ---
 
@@ -169,6 +209,12 @@
   * [ ] Use shared session storage (database, not memory)
   * [ ] Configure load balancer sticky sessions (if needed)
   * [ ] Test multi-instance deployment
+* [ ] Continuous Evaluation Setup
+  * [ ] Set up automated evaluation pipeline
+  * [ ] Create evaluation dashboard
+  * [ ] Implement regression testing for quality metrics
+  * [ ] Track metrics over time
+  * [ ] **Technologies/Methods:** CI/CD integration, evaluation databases, monitoring dashboards (Grafana, custom)
 
 ---
 
