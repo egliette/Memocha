@@ -1,4 +1,4 @@
-.PHONY: up down bash reattach build
+.PHONY: up down backend frontend backend-attach frontend-attach build
 
 up:
 	docker-compose up -d
@@ -6,13 +6,21 @@ up:
 down:
 	docker-compose down
 
-bash:
+backend:
 	docker-compose exec backend bash
 
-reattach:
+frontend:
+	docker-compose exec frontend bash
+
+backend-attach:
 	make down
 	make up
-	make bash
+	make backend
+
+frontend-attach:
+	make down
+	make up
+	make frontend
 
 build:
 	docker-compose build

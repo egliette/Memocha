@@ -4,16 +4,19 @@ repos:
     hooks:
       - id: isort
         args: ["--profile=black", "-p", "app"]
+        exclude: ^frontend/
 
   - repo: https://github.com/psf/black
     rev: 25.1.0
     hooks:
       - id: black
+        exclude: ^frontend/
 
   - repo: https://github.com/PyCQA/autoflake
     rev: v2.3.1
     hooks:
       - id: autoflake
+        exclude: ^frontend/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
