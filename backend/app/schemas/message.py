@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class MessageBase(BaseModel):
@@ -14,12 +14,11 @@ class MessageCreate(MessageBase):
 
 
 class MessageResponse(MessageBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     session_id: UUID
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class MessageHistoryResponse(BaseModel):

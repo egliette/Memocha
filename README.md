@@ -45,9 +45,7 @@
 * [x] Fetch sessions API
 * [x] Store user & assistant messages in DB
 * [x] Message history API
-* [ ] Load full history per session
-* [ ] Define “daily memory” or chunking strategy
-* [ ] Normalize messages for embedding storage
+* [x] Load full history per session
 
 ---
 
@@ -62,6 +60,7 @@
 * [ ] Connect frontend to `/chat`
 * [ ] Display streaming or full responses
 * [ ] Basic error handling
+* [ ] Implement Server-Sent Events (SSE) for chat responses
 
 ---
 
@@ -95,6 +94,8 @@
 * [ ] Inject retrieved memories into LLM context
 * [ ] Inject recent conversation window
 * [ ] Token & context length control
+* [ ] Define "daily memory" or chunking strategy
+* [ ] Normalize messages for embedding storage
 * [ ] RAG Retrieval Evaluation
   * [ ] Measure retrieval accuracy (precision, recall)
   * [ ] Evaluate Mean Reciprocal Rank (MRR)
@@ -120,9 +121,6 @@
 
 **Goal:** Production-ready interaction
 
-* [ ] Enable streaming responses (backend)
-* [ ] Implement Server-Sent Events (SSE) for chat responses
-* [ ] Stream tokens to frontend
 * [ ] Typing indicator
 * [ ] Loading & error states
 * [ ] Session reset / clear memory
