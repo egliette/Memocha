@@ -1,7 +1,9 @@
+import json
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -139,3 +141,78 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     )
 
     return ChatResponse(response=response_text, session_id=str(session.id))
+
+
+@app.post("/chat/stream")
+async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
+    if request.session_id:
+        session = session_crud.get_session(db, request.session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+    else:
+        session = session_crud.create_session(db)
+
+    message_crud.create_message(
+        db=db, session_id=session.id, role="user", content=request.message
+    )
+
+    history_messages = message_crud.get_messages_by_session(
+        db=db,
+        session_id=session.id,
+        skip=0,
+        limit=50,
+    )
+
+    message_history = [
+        {"role": msg.role, "content": msg.content} for msg in history_messages[:-1]
+    ]
+
+    async def generate_stream():
+        llm_service = get_llm_service()
+        full_response = ""
+
+        try:
+            async for chunk in llm_service.stream_chat_with_history(
+                user_message=request.message,
+                message_history=message_history,
+                system_prompt=BASE_SYSTEM_PROMPT,
+            ):
+                full_response += chunk
+                yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+
+            message_crud.create_message(
+                db=db, session_id=session.id, role="assistant", content=full_response
+            )
+
+            completion_data = json.dumps({"session_id": str(session.id)})
+            yield f"event: complete\ndata: {completion_data}\n\n"
+
+        except LLMRateLimitError as e:
+            error_data = json.dumps({"error": "Rate limit exceeded", "detail": str(e)})
+            yield f"event: error\ndata: {error_data}\n\n"
+        except LLMConnectionError as e:
+            error_data = json.dumps(
+                {"error": "LLM service unavailable", "detail": str(e)}
+            )
+            yield f"event: error\ndata: {error_data}\n\n"
+        except LLMTimeoutError as e:
+            error_data = json.dumps(
+                {"error": "LLM request timed out", "detail": str(e)}
+            )
+            yield f"event: error\ndata: {error_data}\n\n"
+        except LLMServiceError as e:
+            error_data = json.dumps({"error": "LLM service error", "detail": str(e)})
+            yield f"event: error\ndata: {error_data}\n\n"
+        except Exception as e:
+            error_data = json.dumps({"error": "Unexpected error", "detail": str(e)})
+            yield f"event: error\ndata: {error_data}\n\n"
+
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )

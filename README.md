@@ -60,11 +60,69 @@
 * [x] Connect frontend to `/chat`
 * [x] Display streaming or full responses
 * [x] Basic error handling
-* [ ] Implement Server-Sent Events (SSE) for chat responses
+* [x] Implement Server-Sent Events (SSE) for chat responses
 
 ---
 
-## **Day 5 — Vector Store & Embeddings (RAG Storage)**
+## **Day 5 — LLM & System Performance Evaluation**
+
+**Goal:** Benchmark and evaluate LLM responses and system performance
+
+* [ ] LLM Response Latency Metrics
+  * [ ] Measure time to first token (TTFT)
+  * [ ] Measure time to completion (TTC)
+  * [ ] Track latency distribution (p50, p95, p99)
+  * [ ] Compare streaming vs non-streaming latency
+* [ ] Streaming Performance Benchmarks
+  * [ ] Measure chunks per second
+  * [ ] Calculate total streaming time
+  * [ ] Evaluate chunk size distribution
+  * [ ] Test streaming with different message lengths
+* [ ] Response Quality Evaluation
+  * [ ] Test response relevance to user queries
+  * [ ] Measure response coherence and fluency
+  * [ ] Evaluate response accuracy for factual questions
+  * [ ] Test response consistency across similar queries
+  * [ ] Evaluate response completeness
+  * [ ] **Technologies/Methods:** Custom evaluation scripts, LLM-as-a-judge, human evaluation
+* [ ] System Performance Benchmarks
+  * [ ] Measure end-to-end request latency (p50, p95, p99)
+  * [ ] Test concurrent request handling capacity
+  * [ ] Evaluate database query performance
+  * [ ] Monitor memory usage during streaming
+  * [ ] Track CPU utilization under load
+  * [ ] Measure database connection pool efficiency
+  * [ ] **Technologies/Methods:** pytest-benchmark, APM tools (Datadog, New Relic), custom profiling
+* [ ] Streaming UX Evaluation
+  * [ ] Measure time to first token (TTFT) - user perception of responsiveness
+  * [ ] Evaluate chunk size impact on perceived performance
+  * [ ] Test streaming behavior with slow network conditions
+  * [ ] Measure user satisfaction with streaming vs non-streaming
+  * [ ] A/B test different streaming configurations
+* [ ] Error Rate and Reliability Metrics
+  * [ ] Track LLM API error rates
+  * [ ] Measure circuit breaker activation frequency
+  * [ ] Evaluate retry success rates
+  * [ ] Monitor connection timeout occurrences
+  * [ ] Track error recovery time
+  * [ ] Measure system uptime and availability
+* [ ] Cost and Efficiency Analysis
+  * [ ] Track token usage per conversation
+  * [ ] Calculate cost per message/response
+  * [ ] Measure tokens per second throughput
+  * [ ] Evaluate cost-effectiveness of streaming vs batch
+  * [ ] Track API cost trends over time
+  * [ ] **Technologies/Methods:** Token counting libraries, cost tracking scripts, usage analytics
+* [ ] Load Testing
+  * [ ] Test system under various load conditions
+  * [ ] Measure performance degradation with increased load
+  * [ ] Identify system bottlenecks
+  * [ ] Test rate limiting effectiveness
+  * [ ] **Technologies/Methods:** Locust, k6, custom load testing scripts
+
+---
+
+## **Day 6 — Vector Store & Embeddings (RAG Storage)**
 
 **Goal:** Store chat history as vectorized memory
 
@@ -83,7 +141,7 @@
 
 ---
 
-## **Day 6 — RAG Retrieval & Memory Injection**
+## **Day 7 — RAG Retrieval & Memory Injection**
 
 **Goal:** Retrieval-Augmented Generation
 
@@ -117,7 +175,7 @@
 
 ---
 
-## **Day 7 — Streaming, UX & Reliability**
+## **Day 8 — Streaming, UX & Reliability**
 
 **Goal:** Production-ready interaction
 
@@ -135,7 +193,7 @@
 
 ---
 
-## **Day 8 — Optimization & Deployment**
+## **Day 9 — Optimization & Deployment**
 
 **Goal:** Stability and scale
 
@@ -160,7 +218,7 @@
 ---
 
 
-## **Day 9 — Multi-User Concurrency & Scalability**
+## **Day 10 — Multi-User Concurrency & Scalability**
 
 **Goal:** Handle many concurrent users efficiently
 

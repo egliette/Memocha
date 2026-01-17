@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import { createSession, sendChatMessage, getMessageHistory } from '@/lib/api';
+import { createSession, streamChatMessage, getMessageHistory } from '@/lib/api';
 import type { Message } from '@/types/chat';
 
 export default function Chat() {
@@ -55,29 +55,48 @@ export default function Chat() {
         setIsLoading(true);
         setError(null);
 
-        try {
-            const response = await sendChatMessage({
+        const tempAssistantId = `temp-${Date.now()}-assistant`;
+        const assistantMessage: Message = {
+            id: tempAssistantId,
+            role: 'assistant',
+            content: '',
+            created_at: new Date().toISOString(),
+            session_id: sessionId,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        const cleanup = streamChatMessage(
+            {
                 message: content,
                 session_id: sessionId,
-            });
-
-            const assistantMessage: Message = {
-                id: `temp-${Date.now()}-assistant`,
-                role: 'assistant',
-                content: response.response,
-                created_at: new Date().toISOString(),
-                session_id: sessionId,
-            };
-            setMessages((prev) => [...prev, assistantMessage]);
-
-            const history = await getMessageHistory(sessionId);
-            setMessages(history.messages);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to send message');
-            setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id));
-        } finally {
-            setIsLoading(false);
-        }
+            },
+            (chunk: string) => {
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        msg.id === tempAssistantId
+                            ? {...msg, content: msg.content + chunk }
+                            : msg
+                    )
+                );
+            },
+            (err: Error) => {
+                setError(err.message || 'Failed to send message');
+                setMessages((prev) =>
+                    prev.filter((msg) => msg.id !== userMessage.id && msg.id !== tempAssistantId)
+                );
+                setIsLoading(false);
+            },
+            async () => {
+                try {
+                    const history = await getMessageHistory(sessionId);
+                    setMessages(history.messages);
+                } catch (err) {
+                    console.error('Failed to fetch message history:', err);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        );
     };
 
     return (
@@ -106,7 +125,7 @@ export default function Chat() {
             )}
 
             {/* Messages */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-auto">
                 <MessageList messages={messages} />
                 <div ref={messagesEndRef} />
             </div>
