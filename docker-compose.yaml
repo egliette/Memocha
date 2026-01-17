@@ -5,13 +5,20 @@ services:
     image: memocha-frontend
     container_name: memocha-frontend
     volumes:
-      - ./frontend:/app
+      - ./frontend/app/app:/app/app
+      - ./frontend/app/components:/app/components
+      - ./frontend/app/lib:/app/lib
+      - ./frontend/app/types:/app/types
+      - ./frontend/app/public:/app/public
+      - ./frontend/app/next.config.ts:/app/next.config.ts
+      - ./frontend/app/tsconfig.json:/app/tsconfig.json
+      - ./frontend/app/postcss.config.mjs:/app/postcss.config.mjs
+      - ./frontend/app/eslint.config.mjs:/app/eslint.config.mjs
     ports:
       - 3000:3000
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8055
-    command: ["bash"]
-    tty: true
+    command: npm run dev
     networks:
       - memocha
 
@@ -35,7 +42,7 @@ services:
       db:
         condition: service_healthy
         restart: true
-    command: ["sh", "-c", "alembic upgrade head && bash"]
+    command: ["sh", "-c", "alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
     tty: True
     networks:
       - memocha

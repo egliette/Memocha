@@ -54,12 +54,12 @@
 **Goal:** Usable chat interface
 
 * [x] Initialize Next.js project
-* [ ] Basic layout and routing
-* [ ] Chat UI (message list, input box, send button)
-* [ ] Role-based message styling
-* [ ] Connect frontend to `/chat`
-* [ ] Display streaming or full responses
-* [ ] Basic error handling
+* [x] Basic layout and routing
+* [x] Chat UI (message list, input box, send button)
+* [x] Role-based message styling
+* [x] Connect frontend to `/chat`
+* [x] Display streaming or full responses
+* [x] Basic error handling
 * [ ] Implement Server-Sent Events (SSE) for chat responses
 
 ---
@@ -226,3 +226,4 @@
 * [ ] Learn about FastAPI's lifespan arg
 * [ ] Allow other API, or self-hosted LLM models
 * [ ] Find an LLM Serving Engine
+* [ ] Add non-root user for security in frontend Dockerfile (production)
