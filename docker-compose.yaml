@@ -1,4 +1,20 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+    image: memocha-frontend
+    container_name: memocha-frontend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - 3000:3000
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8055
+    command: ["bash"]
+    tty: true
+    networks:
+      - memocha
+
   backend:
     build:
       context: ./backend
