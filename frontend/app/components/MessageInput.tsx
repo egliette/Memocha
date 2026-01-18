@@ -1,14 +1,26 @@
 'use client';
 
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, forwardRef, useImperativeHandle, useRef } from 'react';
 
 interface MessageInputProps {
     onSend: (message: string) => void;
     disabled?: boolean;
 }
 
-export default function MessageInput({ onSend, disabled = false }: MessageInputProps) {
+export interface MessageInputRef {
+    focus: () => void;
+}
+
+const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
+    ({ onSend, disabled = false }, ref) => {
     const [message, setMessage] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useImperativeHandle(ref, () => ({
+        focus: () => {
+            textareaRef.current?.focus();
+        },
+    }));
 
     const handleSend = () => {
         if (message.trim() && !disabled) {
@@ -28,6 +40,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
         <div className="border-t border-gray-700 p-4 bg-gray-800">
             <div className="flex gap-2">
                 <textarea
+                    ref={textareaRef}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyPress}
@@ -52,4 +65,8 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
             </div>
         </div>
     );
-}
+});
+
+MessageInput.displayName = 'MessageInput';
+
+export default MessageInput;

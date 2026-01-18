@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import MessageList from './MessageList';
-import MessageInput from './MessageInput';
+import MessageInput, { type MessageInputRef } from './MessageInput';
 import { createSession, streamChatMessage, getMessageHistory } from '@/lib/api';
 import type { Message } from '@/types/chat';
 
@@ -12,6 +12,7 @@ export default function Chat() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null >(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<MessageInputRef>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -85,6 +86,9 @@ export default function Chat() {
                     prev.filter((msg) => msg.id !== userMessage.id && msg.id !== tempAssistantId)
                 );
                 setIsLoading(false);
+                setTimeout(() => {
+                    inputRef.current?.focus();
+                }, 100);
             },
             async () => {
                 try {
@@ -94,6 +98,9 @@ export default function Chat() {
                     console.error('Failed to fetch message history:', err);
                 } finally {
                     setIsLoading(false);
+                    setTimeout(() => {
+                        inputRef.current?.focus();
+                    }, 100);
                 }
             }
         );
@@ -138,7 +145,7 @@ export default function Chat() {
             )}
 
             {/* Input */}
-            <MessageInput onSend={handleSend} disabled={isLoading} />
+            <MessageInput ref={inputRef} onSend={handleSend} disabled={isLoading} />
         </div>
     );
 }

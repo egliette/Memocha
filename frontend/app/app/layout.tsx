@@ -7,6 +7,10 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: "Memocha - RAG-based Chatbot",
   description: "Chatbot with long-term memory",
+  icons: {
+    icon: '/avatar.ico',
+    apple: '/avatar.ico',
+  }
 };
 
 export default function RootLayout({
