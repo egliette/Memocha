@@ -18,10 +18,20 @@ export default function MessageList({ messages }: MessageListProps) {
                 messages.map((message) => (
                     <div
                         key={message.id}
-                        className={`flex ${
+                        className={`flex items-start gap-3 ${
                             message.role === 'user' ? 'justify-end' : 'justify-start'
                         }`}
                     >
+                        {message.role === 'assistant' && (
+                            <div className="flex-shrink-0 pt-1">
+                                <img
+                                    src="/avatar.jpg"
+                                    alt="Assistant"
+                                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-600"
+                                />
+                            </div>
+                        )}
+
                         <div
                             className={`max-w-[80%] rounded-lg px-4 py-2 ${
                                 message.role === 'user'
