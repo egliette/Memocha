@@ -126,6 +126,7 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
             user_message=request.message,
             message_history=message_history,
             system_prompt=BASE_SYSTEM_PROMPT,
+            session_id=str(session.id),
         )
     except LLMRateLimitError:
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
@@ -176,6 +177,7 @@ async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
                 user_message=request.message,
                 message_history=message_history,
                 system_prompt=BASE_SYSTEM_PROMPT,
+                session_id=str(session.id),
             ):
                 full_response += chunk
                 yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"

@@ -27,6 +27,7 @@ from app.core.exceptions import (
     LLMServiceError,
     LLMTimeoutError,
 )
+from app.core.observability import get_langfuse_handler
 from app.core.prompts import BASE_SYSTEM_PROMPT
 from app.services.circuit_breaker import llm_circuit_breaker
 
@@ -59,9 +60,22 @@ class LLMService:
         before_sleep=before_sleep_log(logger, logging.WARNING),
         reraise=True,
     )
-    def generate_response(self, messages: list) -> str:
+    def generate_response(self, messages: list, session_id: str = None) -> str:
         try:
-            response = self.llm.invoke(messages)
+            config = {}
+            langfuse_handler = get_langfuse_handler()
+
+            if langfuse_handler:
+                config["callbacks"] = [langfuse_handler]
+                config["metadata"] = {
+                    "model": self.llm.model_name,
+                    "temperature": self.llm.temperature,
+                }
+                if session_id:
+                    config["run_name"] = f"session-{session_id}"
+                    config["tags"] = [f"session:{session_id}"]
+
+            response = self.llm.invoke(messages, config=config)
             return response.content
         except CircuitBreakerError as e:
             logger.error(f"Circuit breaker is open: {e}")
@@ -88,7 +102,12 @@ class LLMService:
             logger.error(f"Unexpected error: {e}", exc_info=True)
             raise LLMServiceError(f"Unexpected error: {str(e)}") from e
 
-    def chat(self, user_message: str, system_prompt: Optional[str] = None) -> str:
+    def chat(
+        self,
+        user_message: str,
+        system_prompt: Optional[str] = None,
+        session_id: str = None,
+    ) -> str:
         if system_prompt is None:
             system_prompt = BASE_SYSTEM_PROMPT
 
@@ -97,7 +116,7 @@ class LLMService:
             HumanMessage(content=user_message),
         ]
 
-        response = self.generate_response(messages)
+        response = self.generate_response(messages, session_id)
 
         if not response or not response.strip():
             logger.warning("Received empty response from LLM")
@@ -110,6 +129,7 @@ class LLMService:
         user_message: str,
         message_history: Optional[list[dict]] = None,
         system_prompt: Optional[str] = None,
+        session_id: str = None,
     ) -> str:
         if system_prompt is None:
             system_prompt = BASE_SYSTEM_PROMPT
@@ -125,7 +145,7 @@ class LLMService:
 
         messages.append(HumanMessage(content=user_message))
 
-        response = self.generate_response(messages)
+        response = self.generate_response(messages, session_id)
 
         if not response or not response.strip():
             logger.warning("Received empty response from LLM")
@@ -146,6 +166,7 @@ class LLMService:
         user_message: str,
         message_history: Optional[list[dict]] = None,
         system_prompt: Optional[str] = None,
+        session_id: str = None,
     ) -> AsyncIterator[str]:
         if system_prompt is None:
             system_prompt = BASE_SYSTEM_PROMPT
@@ -161,8 +182,21 @@ class LLMService:
 
         messages.append(HumanMessage(content=user_message))
 
+        config = {}
+        langfuse_handler = get_langfuse_handler()
+
+        if langfuse_handler:
+            config["callbacks"] = [langfuse_handler]
+            config["metadata"] = {
+                "model": self.llm.model_name,
+                "temperature": self.llm.temperature,
+            }
+            if session_id:
+                config["run_name"] = f"session-{session_id}"
+                config["tags"] = [f"session:{session_id}"]
+
         try:
-            async for chunk in self.llm.astream(messages):
+            async for chunk in self.llm.astream(messages, config=config):
                 if chunk.content:
                     yield chunk.content
         except CircuitBreakerError as e:

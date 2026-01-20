@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4.1-nano"
     llm_temperature: float = 0.7
     llm_max_tokens: int = 1000
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    langfuse_host: str = ""
 
 
 settings = Settings()

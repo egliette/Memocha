@@ -38,6 +38,9 @@ services:
       LLM_MODEL: ${LLM_MODEL}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE}
       LLM_MAX_TOKENS: ${LLM_MAX_TOKENS}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL}
     depends_on:
       db:
         condition: service_healthy

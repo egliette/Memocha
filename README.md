@@ -2,6 +2,31 @@
 
 **RAG-based Chatbot with Long-Term Memory**
 
+## Installation
+
+### Langfuse
+
+#### 1. Start Langfuse
+
+```bash
+docker-compose -f docker-compose.langfuse.yaml up -d
+```
+
+#### 2. Access Langfuse
+
+Open [http://localhost:3001](http://localhost:3001) in your browser and create your account.
+
+#### Minimum `.env` Configuration
+
+```bash
+DATABASE_URL=postgresql://langfuse:langfuse@langfuse-postgres:5432/langfuse
+NEXTAUTH_URL=http://localhost:3001
+NEXTAUTH_SECRET=mysecret  # generate with: openssl rand -base64 32
+SALT=mysalt  # generate with: openssl rand -base64 32
+ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000  # generate with: openssl rand -hex 32
+```
+
+
 ## Todo List
 
 ---
@@ -66,59 +91,24 @@
 
 ## **Day 5 — LLM & System Performance Evaluation**
 
-**Goal:** Benchmark and evaluate LLM responses and system performance
+**Goal:** Monitor LLM performance, evaluate response quality, and track system resources
 
-* [ ] LLM Response Latency Metrics
-  * [ ] Measure time to first token (TTFT)
-  * [ ] Measure time to completion (TTC)
-  * [ ] Track latency distribution (p50, p95, p99)
-  * [ ] Compare streaming vs non-streaming latency
-* [ ] Streaming Performance Benchmarks
-  * [ ] Measure chunks per second
-  * [ ] Calculate total streaming time
-  * [ ] Evaluate chunk size distribution
-  * [ ] Test streaming with different message lengths
-* [ ] Response Quality Evaluation
-  * [ ] Test response relevance to user queries
-  * [ ] Measure response coherence and fluency
-  * [ ] Evaluate response accuracy for factual questions
-  * [ ] Test response consistency across similar queries
-  * [ ] Evaluate response completeness
-  * [ ] **Technologies/Methods:** Custom evaluation scripts, LLM-as-a-judge, human evaluation
-* [ ] System Performance Benchmarks
-  * [ ] Measure end-to-end request latency (p50, p95, p99)
-  * [ ] Test concurrent request handling capacity
-  * [ ] Evaluate database query performance
-  * [ ] Monitor memory usage during streaming
-  * [ ] Track CPU utilization under load
-  * [ ] Measure database connection pool efficiency
-  * [ ] **Technologies/Methods:** pytest-benchmark, APM tools (Datadog, New Relic), custom profiling
-* [ ] Streaming UX Evaluation
-  * [ ] Measure time to first token (TTFT) - user perception of responsiveness
-  * [ ] Evaluate chunk size impact on perceived performance
-  * [ ] Test streaming behavior with slow network conditions
-  * [ ] Measure user satisfaction with streaming vs non-streaming
-  * [ ] A/B test different streaming configurations
-* [ ] Error Rate and Reliability Metrics
-  * [ ] Track LLM API error rates
-  * [ ] Measure circuit breaker activation frequency
-  * [ ] Evaluate retry success rates
-  * [ ] Monitor connection timeout occurrences
-  * [ ] Track error recovery time
-  * [ ] Measure system uptime and availability
-* [ ] Cost and Efficiency Analysis
-  * [ ] Track token usage per conversation
-  * [ ] Calculate cost per message/response
-  * [ ] Measure tokens per second throughput
-  * [ ] Evaluate cost-effectiveness of streaming vs batch
-  * [ ] Track API cost trends over time
-  * [ ] **Technologies/Methods:** Token counting libraries, cost tracking scripts, usage analytics
-* [ ] Load Testing
-  * [ ] Test system under various load conditions
-  * [ ] Measure performance degradation with increased load
-  * [ ] Identify system bottlenecks
-  * [ ] Test rate limiting effectiveness
-  * [ ] **Technologies/Methods:** Locust, k6, custom load testing scripts
+* [x] Integrate Langfuse for tracing
+* [x] LLM Performance Metrics (auto-tracked by Langfuse)
+  * [x] Time to First Token (TTFT)
+  * [x] Total latency (p50, p95, p99)
+  * [x] Token usage (input/output)
+  * [x] Cost per request
+  * [x] Error rates
+* [ ] Response Quality Evaluation (Langfuse LLM-as-judge)
+  * [ ] Set up evaluators (relevance, coherence, helpfulness)
+  * [ ] Run evaluations on production traces
+  * [ ] Review scores in dashboard
+* [ ] Monitor system resources during usage
+  * [ ] CPU utilization
+  * [ ] Memory usage
+  * [ ] GPU utilization
+  * [ ] **Tool:** `docker stats`, cAdvisor, `nvidia-smi`, netdata
 
 ---
 
