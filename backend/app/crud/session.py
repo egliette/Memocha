@@ -1,32 +1,45 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.session import Session as SessionModel
-from sqlalchemy.orm import Session
 
 
-def create_session(db: Session) -> SessionModel:
+async def create_session(db: AsyncSession) -> SessionModel:
     session = SessionModel(id=uuid4(), created_at=datetime.now(timezone.utc))
     db.add(session)
-    db.commit()
-    db.refresh(session)
+    await db.commit()
+    await db.refresh(session)
     return session
 
 
-def get_session(db: Session, session_id: UUID) -> SessionModel | None:
-    """Get a session by ID"""
-    return db.query(SessionModel).filter(SessionModel.id == session_id).first()
+async def get_session(db: AsyncSession, session_id: UUID) -> SessionModel | None:
+    result = await db.execute(
+        select(SessionModel).filter(SessionModel.id == session_id)
+    )
+    return result.scalar_one_or_none()
 
 
-def get_all_sessions(db: Session, skip: int = 0, limit: int = 100):
+async def get_all_sessions(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> list[SessionModel]:
     """Get all sessions with pagination"""
-    return db.query(SessionModel).offset(skip).limit(limit).all()
+    result = await db.execute(select(SessionModel).offset(skip).limit(limit))
+    return result.scalars().all()
 
 
-def delete_session(db: Session, session_id: UUID) -> bool:
-    session = get_session(db, session_id)
+async def count_sessions(db: AsyncSession) -> int | None:
+    result = await db.execute(select(func.count()).select_from(SessionModel))
+    total = result.scalar()
+    return total
+
+
+async def delete_session(db: AsyncSession, session_id: UUID) -> bool:
+    session = await get_session(db, session_id)
     if not session:
         return False
-    db.delete(session)
-    db.commit()
+    await db.delete(session)
+    await db.commit()
     return True

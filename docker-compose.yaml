@@ -33,6 +33,7 @@ services:
       - ./backend:/app
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL_SYNC: ${DATABASE_URL_SYNC}
       LOG_LEVEL: ${LOG_LEVEL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       LLM_MODEL: ${LLM_MODEL}

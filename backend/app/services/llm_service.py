@@ -60,7 +60,7 @@ class LLMService:
         before_sleep=before_sleep_log(logger, logging.WARNING),
         reraise=True,
     )
-    def generate_response(self, messages: list, session_id: str = None) -> str:
+    async def generate_response(self, messages: list, session_id: str = None) -> str:
         try:
             config = {}
             langfuse_handler = get_langfuse_handler()
@@ -75,7 +75,7 @@ class LLMService:
                     config["run_name"] = f"session-{session_id}"
                     config["tags"] = [f"session:{session_id}"]
 
-            response = self.llm.invoke(messages, config=config)
+            response = await self.llm.invoke(messages, config=config)
             return response.content
         except CircuitBreakerError as e:
             logger.error(f"Circuit breaker is open: {e}")
@@ -102,7 +102,7 @@ class LLMService:
             logger.error(f"Unexpected error: {e}", exc_info=True)
             raise LLMServiceError(f"Unexpected error: {str(e)}") from e
 
-    def chat(
+    async def chat(
         self,
         user_message: str,
         system_prompt: Optional[str] = None,
@@ -116,7 +116,7 @@ class LLMService:
             HumanMessage(content=user_message),
         ]
 
-        response = self.generate_response(messages, session_id)
+        response = await self.generate_response(messages, session_id)
 
         if not response or not response.strip():
             logger.warning("Received empty response from LLM")
@@ -124,7 +124,7 @@ class LLMService:
 
         return response
 
-    def chat_with_history(
+    async def chat_with_history(
         self,
         user_message: str,
         message_history: Optional[list[dict]] = None,
@@ -145,7 +145,7 @@ class LLMService:
 
         messages.append(HumanMessage(content=user_message))
 
-        response = self.generate_response(messages, session_id)
+        response = await self.generate_response(messages, session_id)
 
         if not response or not response.strip():
             logger.warning("Received empty response from LLM")

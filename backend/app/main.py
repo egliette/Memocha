@@ -4,10 +4,10 @@ from uuid import UUID
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database import AsyncSessionLocal, get_db
 from app.core.exceptions import (
     LLMConnectionError,
     LLMRateLimitError,
@@ -41,24 +41,29 @@ app.add_middleware(
 )
 
 
+@app.get("/")
 @app.get("/health")
-def health_check():
+async def health_check():
     return {"status": "ok"}
 
 
 @app.post("/sessions", response_model=SessionResponse, status_code=201)
-async def create_session(db: Session = Depends(get_db)):
-    session = session_crud.create_session(db)
+async def create_session(db: AsyncSession = Depends(get_db)):
+    session = await session_crud.create_session(db)
     return SessionResponse.model_validate(session)
 
 
 @app.get("/sessions", response_model=SessionListResponse)
-async def get_sessions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    sessions = session_crud.get_all_sessions(db, skip=skip, limit=limit)
-    total = db.query(SessionModel).count()
+async def get_sessions(
+    skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)
+):
+    sessions = await session_crud.get_all_sessions(db, skip=skip, limit=limit)
+    total = await session_crud.count_sessions(db)
 
     return SessionListResponse(
-        sessions=[SessionResponse.model_validate(s) for s in sessions],
+        sessions=[
+            SessionResponse.model_validate(s) for s in sessions
+        ],  # Convert each ORM object to Pydantic model
         total=total,
         skip=skip,
         limit=limit,
@@ -66,8 +71,8 @@ async def get_sessions(skip: int = 0, limit: int = 100, db: Session = Depends(ge
 
 
 @app.get("/sessions/{session_id}", response_model=SessionResponse)
-async def get_session(session_id: UUID, db: Session = Depends(get_db)):
-    session = session_crud.get_session(db, session_id)
+async def get_session(session_id: UUID, db: AsyncSession = Depends(get_db)):
+    session = await session_crud.get_session(db, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     return SessionResponse.model_validate(session)
@@ -75,17 +80,20 @@ async def get_session(session_id: UUID, db: Session = Depends(get_db)):
 
 @app.get("/sessions/{session_id}/messages", response_model=MessageHistoryResponse)
 async def get_message_history(
-    session_id: UUID, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+    session_id: UUID,
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
 ):
-    session = session_crud.get_session(db, session_id)
+    session = await session_crud.get_session(db, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    messages = message_crud.get_messages_by_session(
-        db, session_id, skip - skip, limit=limit
+    messages = await message_crud.get_messages_by_session(
+        db, session_id, skip=skip, limit=limit
     )
 
-    total = db.query(Message).filter(Message.session_id == session_id).count()
+    total = await message_crud.count_messages_by_session(db, session_id)
 
     return MessageHistoryResponse(
         messages=[MessageResponse.model_validate(m) for m in messages],
@@ -97,19 +105,19 @@ async def get_message_history(
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, db: Session = Depends(get_db)):
+async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
     if request.session_id:
-        session = session_crud.get_session(db, request.session_id)
+        session = await session_crud.get_session(db, request.session_id)
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
     else:
-        session = session_crud.create_session(db)
+        session = await session_crud.create_session(db)
 
-    message_crud.create_message(
+    await message_crud.create_message(
         db=db, session_id=session.id, role="user", content=request.message
     )
 
-    history_messages = message_crud.get_messages_by_session(
+    history_messages = await message_crud.get_messages_by_session(
         db=db,
         session_id=session.id,
         skip=0,
@@ -122,7 +130,7 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
 
     llm_service = get_llm_service()
     try:
-        response_text = llm_service.chat_with_history(
+        response_text = await llm_service.chat_with_history(
             user_message=request.message,
             message_history=message_history,
             system_prompt=BASE_SYSTEM_PROMPT,
@@ -145,19 +153,19 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
 
 
 @app.post("/chat/stream")
-async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
+async def chat_stream(request: ChatRequest, db: AsyncSession = Depends(get_db)):
     if request.session_id:
-        session = session_crud.get_session(db, request.session_id)
+        session = await session_crud.get_session(db, request.session_id)
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
     else:
-        session = session_crud.create_session(db)
+        session = await session_crud.create_session(db)
 
-    message_crud.create_message(
+    await message_crud.create_message(
         db=db, session_id=session.id, role="user", content=request.message
     )
 
-    history_messages = message_crud.get_messages_by_session(
+    history_messages = await message_crud.get_messages_by_session(
         db=db,
         session_id=session.id,
         skip=0,
@@ -168,6 +176,8 @@ async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
         {"role": msg.role, "content": msg.content} for msg in history_messages[:-1]
     ]
 
+    session_id = session.id
+
     async def generate_stream():
         llm_service = get_llm_service()
         full_response = ""
@@ -177,14 +187,18 @@ async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
                 user_message=request.message,
                 message_history=message_history,
                 system_prompt=BASE_SYSTEM_PROMPT,
-                session_id=str(session.id),
+                session_id=str(session_id),
             ):
                 full_response += chunk
-                yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+                yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"  # ensure_ascii=False allows UTF-8 chars (emojis, etc.)
 
-            message_crud.create_message(
-                db=db, session_id=session.id, role="assistant", content=full_response
-            )
+            async with AsyncSessionLocal() as new_db:
+                await message_crud.create_message(
+                    db=new_db,
+                    session_id=session.id,
+                    role="assistant",
+                    content=full_response,
+                )
 
             completion_data = json.dumps({"session_id": str(session.id)})
             yield f"event: complete\ndata: {completion_data}\n\n"
@@ -211,10 +225,10 @@ async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
 
     return StreamingResponse(
         generate_stream(),
-        media_type="text/event-stream",
+        media_type="text/event-stream",  # SSE (Server-Sent Events) MIME type for streaming responses
         headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
+            "Cache-Control": "no-cache",  # Prevent caching of streaming responses
+            "Connection": "keep-alive",  # Keep connection open for streaming
+            "X-Accel-Buffering": "no",  # Disable nginx buffering for real-time streaming
         },
     )

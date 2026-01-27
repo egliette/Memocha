@@ -9,7 +9,7 @@
 
 services:
   langfuse-web:
-    image: docker.io/langfuse/langfuse:3
+    image: docker.io/langfuse/langfuse:latest
     restart: always
     depends_on:
       langfuse-postgres:
@@ -72,7 +72,7 @@ services:
       - memocha
 
   langfuse-worker:
-    image: docker.io/langfuse/langfuse-worker:3
+    image: docker.io/langfuse/langfuse-worker:latest
     restart: always
     depends_on:
       langfuse-postgres:
