@@ -43,14 +43,18 @@ class LLMService:
         temperature: float = 0.7,
         max_tokens: int = 1000,
         timeout: int = 30,
+        base_url: str | None = None,
     ):
-        self.llm = ChatOpenAI(
-            model=model_name,
-            api_key=api_key,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            timeout=timeout,
-        )
+        kwargs = {
+            "model": model_name,
+            "api_key": api_key,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "timeout": timeout,
+        }
+        if base_url:
+            kwargs["base_url"] = base_url
+        self.llm = ChatOpenAI(**kwargs)
 
     @llm_circuit_breaker
     @retry(
@@ -75,7 +79,7 @@ class LLMService:
                     config["run_name"] = f"session-{session_id}"
                     config["tags"] = [f"session:{session_id}"]
 
-            response = await self.llm.invoke(messages, config=config)
+            response = await self.llm.ainvoke(messages, config=config)
             return response.content
         except CircuitBreakerError as e:
             logger.error(f"Circuit breaker is open: {e}")
@@ -236,5 +240,6 @@ def get_llm_service() -> LLMService:
             api_key=settings.openai_api_key,
             temperature=settings.llm_temperature,
             max_tokens=settings.llm_max_tokens,
+            base_url=settings.openai_api_base,
         )
     return _llm_service

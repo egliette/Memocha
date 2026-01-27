@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:15
+    container_name: memocha-db-loadtest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - memocha
+
+  mock-openai:
+    image: memocha-backend
+    container_name: memocha-mock-openai
+    command: uv run uvicorn tests.loadtest.mock_openai_server:app --host 0.0.0.0 --port 8100
+    volumes:
+      - ./backend:/app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8100/health || exit 1"]
+      interval: 5s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+    networks:
+      - memocha
+
+  backend-loadtest:
+    image: memocha-backend
+    container_name: memocha-backend-loadtest
+    ports:
+      - "8055:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@memocha-db-loadtest:5432/${POSTGRES_DB}
+      DATABASE_URL_SYNC: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@memocha-db-loadtest:5432/${POSTGRES_DB}
+      LOG_LEVEL: WARNING
+      OPENAI_API_KEY: sk-mock-key
+      OPENAI_API_BASE: http://memocha-mock-openai:8100/v1
+      LLM_MODEL: gpt-4-mock
+      LLM_TEMPERATURE: 0.7
+      LLM_MAX_TOKENS: 1000
+    depends_on:
+      db:
+        condition: service_healthy
+      mock-openai:
+        condition: service_healthy
+    command: ["sh", "-c", "alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    networks:
+      - memocha
+
+  locust:
+    image: memocha-backend
+    container_name: memocha-locust
+    command: uv run locust -f tests/loadtest/locustfile.py --host=http://memocha-backend-loadtest:8000
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - backend-loadtest
+    networks:
+      - memocha
+
+networks:
+  memocha:
+    external: true

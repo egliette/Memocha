@@ -100,15 +100,12 @@ ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 
   * [x] Token usage (input/output)
   * [x] Cost per request
   * [x] Error rates
-* [ ] Response Quality Evaluation (Langfuse LLM-as-judge)
-  * [ ] Set up evaluators (relevance, coherence, helpfulness)
-  * [ ] Run evaluations on production traces
-  * [ ] Review scores in dashboard
-* [ ] Monitor system resources during usage
-  * [ ] CPU utilization
-  * [ ] Memory usage
-  * [ ] GPU utilization
-  * [ ] **Tool:** `docker stats`, cAdvisor, `nvidia-smi`, netdata
+* [x] Response Quality Evaluation (Langfuse LLM-as-judge)
+  * [x] Set up evaluators (relevance, coherence, helpfulness)
+  * [x] Run evaluations on production traces
+  * [x] Review scores in dashboard
+* [x] Monitor system resources during usage
+* [x] Load testing with Locust
 
 ---
 
