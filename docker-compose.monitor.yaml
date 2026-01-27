@@ -1,0 +1,61 @@
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: memocha-cadvisor
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - 8080:8080
+    networks:
+      - memocha
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: memocha-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9090:9090
+    depends_on:
+      - cadvisor
+    networks:
+      - memocha
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: memocha-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - 3002:3000
+    depends_on:
+      - prometheus
+    networks:
+      - memocha
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  memocha:
+    external: true
