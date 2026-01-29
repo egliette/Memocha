@@ -72,6 +72,7 @@ export default function Chat() {
                 session_id: sessionId,
             },
             (chunk: string) => {
+                setIsLoading(false);
                 setMessages((prev) =>
                     prev.map((msg) =>
                         msg.id === tempAssistantId
@@ -133,7 +134,7 @@ export default function Chat() {
 
             {/* Messages */}
             <div className="flex-1 overflow-auto">
-                <MessageList messages={messages} />
+                <MessageList messages={messages} isLoading={isLoading} />
                 <div ref={messagesEndRef} />
             </div>
 

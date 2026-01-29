@@ -1,13 +1,15 @@
 'use client';
 
+import Image from 'next/image';
 import type { Message } from '@/types/chat';
 
 
 interface MessageListProps {
     messages: Message[];
+    isLoading?: boolean;
 }
 
-export default function MessageList({ messages }: MessageListProps) {
+export default function MessageList({ messages, isLoading }: MessageListProps) {
     return (
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 ? (
@@ -15,7 +17,7 @@ export default function MessageList({ messages }: MessageListProps) {
                     <p>No messages yet. Start a conversation!</p>
                 </div>
             ) : (
-                messages.map((message) => (
+                messages.filter((message) => !(message.role === 'assistant' && message.content === '')).map((message) => (
                     <div
                         key={message.id}
                         className={`flex items-start gap-3 ${
@@ -47,8 +49,33 @@ export default function MessageList({ messages }: MessageListProps) {
                             </div>
                         </div>
                     </div>
-               ))
+                ))
             )}
+            {/* Loading animation bubble */}
+            {isLoading && (
+                <div className="flex items-start gap-3">
+                    {/* Avatar */}
+                    <div className="flex-shrink-0">
+                        <Image
+                            src="/avatar.jpg"
+                            alt="Assistant"
+                            width={48}
+                            height={48}
+                            className="rounded-full border-2 border-gray-600"
+                        />
+                    </div>
+                    {/* Loading bubble */}
+                    <div className="max-w-[80%] px-4 py-3 rounded-2xl bg-gray-700">
+                        <p className="text-sm font-semibold text-gray-300 mb-1">Assistant</p>
+                        <div className="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
